@@ -21,6 +21,7 @@ public class SKPhoto:NSObject,SKPhotoProtocol {
     
     public var underlyingImage:UIImage!
     public var photoURL:String!
+    public var photoURLAuthorization:String!
     public var shouldCachePhotoURLImage:Bool = false
     public var caption:String!
     
@@ -33,9 +34,10 @@ public class SKPhoto:NSObject,SKPhotoProtocol {
         underlyingImage = image
     }
     
-    convenience init(url: String){
+    convenience init(url: String, Auth: String){
         self.init()
         photoURL = url
+        photoURLAuthorization = Auth
     }
     
     public func checkCache(){
@@ -53,7 +55,11 @@ public class SKPhoto:NSObject,SKPhotoProtocol {
         
         if photoURL != nil {
             // Fetch Image
-            let session = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
+            let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+            if photoURLAuthorization != "" {
+                config.HTTPAdditionalHeaders = ["Authorization" : photoURLAuthorization]
+            }
+            let session = NSURLSession(configuration: config)
             if let nsURL = NSURL(string: photoURL) {
                 session.dataTaskWithURL(nsURL, completionHandler: { [weak self](response: NSData?, data: NSURLResponse?, error: NSError?) in
                     if let _self = self {
@@ -86,8 +92,8 @@ public class SKPhoto:NSObject,SKPhotoProtocol {
     public class func photoWithImage(image: UIImage) -> SKPhoto {
         return SKPhoto(image: image)
     }
-    public class func photoWithImageURL(url: String) -> SKPhoto {
-        return SKPhoto(url: url)
+    public class func photoWithImageURL(url: String, authorization: String = "") -> SKPhoto {
+        return SKPhoto(url: url, Auth: authorization)
     }
 }
 
